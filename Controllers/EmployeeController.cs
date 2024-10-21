@@ -57,17 +57,7 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult updateEMployess(Guid id, UpdateEmployeeDto updateEmployeeDto)
         {
-            var employee = dbContext.Employeess.Find(id);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-            employee.Name = updateEmployeeDto.Name;
-            employee.Email = updateEmployeeDto.Email;
-            employee.Phone = updateEmployeeDto.Phone;
-            employee.Salary = updateEmployeeDto.Salary;
-            dbContext.SaveChanges();
-            return Ok(employee);
+           
         }
 
         [HttpDelete]
@@ -78,7 +68,28 @@ namespace EmployeeAdminPortal.Controllers
             if (employee == null)
             {
                 return NotFound();
-            }
+            }        var employee = dbContext.Employeess.Find(id);
+        if (employee == null)
+        {
+            return NotFound();
+        }
+        if (!string.IsNullOrEmpty(updateEmployeeDto.Name))
+        {
+            employee.Name = updateEmployeeDto.Name;
+        }
+
+        if (!string.IsNullOrEmpty(updateEmployeeDto.Email))
+        {
+            employee.Email = updateEmployeeDto.Email;
+        }
+
+        if (!string.IsNullOrEmpty(updateEmployeeDto.Phone))
+        {
+            employee.Phone = updateEmployeeDto.Phone;
+        }
+
+        dbContext.SaveChanges();
+        return Ok(employee);
             dbContext.Employeess.Remove(employee);
             dbContext.SaveChanges();
             return Ok("Delete is Done");
