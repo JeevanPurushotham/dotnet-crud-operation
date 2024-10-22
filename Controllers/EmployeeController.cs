@@ -1,4 +1,5 @@
-﻿using EmployeeAdminPortal.Data;
+﻿using AutoMapper;
+using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Models;
 using EmployeeAdminPortal.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,10 +12,13 @@ namespace EmployeeAdminPortal.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly ApplicationDbContext dbContext;
+        private readonly IMapper _mapper;
 
-        public EmployeeController(ApplicationDbContext dbContext)
+
+        public EmployeeController(ApplicationDbContext dbContext , IMapper mapper)
         {
             this.dbContext = dbContext;
+            _mapper = mapper;
         }
         [HttpGet]
         public IActionResult GetAllEmployee()
@@ -26,6 +30,16 @@ namespace EmployeeAdminPortal.Controllers
         [HttpPost]
         public IActionResult AddEmployee(AddEmployeedto addEmployeedto)
         {
+            // Check if the employee with the same email or phone number already exists
+            var existingEmployee = dbContext.Employeess
+                .FirstOrDefault(e => e.Email == addEmployeedto.Email || e.Phone == addEmployeedto.Phone);
+
+            if (existingEmployee != null)
+            {
+                return BadRequest("An employee with the same email or phone number already exists.");
+            }
+            //var employeeEntity = _mapper.Map<Employee>(addEmployeedto);
+
             var employeeEntity = new Employee()
             {
                 Name = addEmployeedto.Name,
@@ -55,20 +69,23 @@ namespace EmployeeAdminPortal.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public IActionResult updateEMployess(Guid id, UpdateEmployeeDto updateEmployeeDto)
+        public IActionResult UpdateEmployee(Guid id, [FromBody] UpdateEmployeeDto updateEmployeeDto)
         {
+            // Find the employee by the provided id
             var employee = dbContext.Employeess.Find(id);
             if (employee == null)
             {
-                return NotFound();
+                return NotFound($"Employee with id {id} not found"); // Better logging for debugging
             }
-            employee.Name = updateEmployeeDto.Name;
-            employee.Email = updateEmployeeDto.Email;
-            employee.Phone = updateEmployeeDto.Phone;
-            employee.Salary = updateEmployeeDto.Salary;
+            _mapper.Map(updateEmployeeDto, employee);
+
+
+            // Save the changes in the database
             dbContext.SaveChanges();
-            return Ok(employee);
+
+            return Ok(employee); // Return the updated employee
         }
+
 
         [HttpDelete]
         [Route("{id:guid}")]
