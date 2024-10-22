@@ -2,7 +2,6 @@
 using EmployeeAdminPortal.Data;
 using EmployeeAdminPortal.Models;
 using EmployeeAdminPortal.Models.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeAdminPortal.Controllers
@@ -15,7 +14,7 @@ namespace EmployeeAdminPortal.Controllers
         private readonly IMapper _mapper;
 
 
-        public EmployeeController(ApplicationDbContext dbContext , IMapper mapper)
+        public EmployeeController(ApplicationDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
             _mapper = mapper;
@@ -59,7 +58,7 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult GetEMployeeById(Guid id)
         {
-          var employee = dbContext.Employeess.Find(id);
+            var employee = dbContext.Employeess.Find(id);
             if (employee == null)
             {
                 return NotFound();
@@ -84,6 +83,7 @@ namespace EmployeeAdminPortal.Controllers
             dbContext.SaveChanges();
 
             return Ok(employee); // Return the updated employee
+
         }
 
 
@@ -91,14 +91,24 @@ namespace EmployeeAdminPortal.Controllers
         [Route("{id:guid}")]
         public IActionResult DeleteEmployee(Guid id)
         {
+            // Find the employee by ID
             var employee = dbContext.Employeess.Find(id);
+
+            // If the employee is not found, return a 404 NotFound response
             if (employee == null)
             {
-                return NotFound();
+                return NotFound($"Employee with ID {id} not found.");
             }
+
+            // Remove the employee from the database
             dbContext.Employeess.Remove(employee);
+
+            // Save the changes to the database
             dbContext.SaveChanges();
-            return Ok("Delete is Done");
+
+            // Return a success message or the deleted employee object (if needed)
+            return Ok($"Employee with ID {id} has been deleted successfully.");
         }
     }
+
 }
